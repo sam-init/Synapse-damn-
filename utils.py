@@ -1,27 +1,23 @@
+import firebase_admin
+from firebase_admin import credentials, storage
 import os
-from supabase import create_client, Client
-from dotenv import load_dotenv
 
-load_dotenv()
+# Path to your Firebase admin JSON
+cred = credentials.Certificate("firebase-admin.json")
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
-BUCKET_NAME = "Synapse"
+# Initialize Firebase
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {
+        "storageBucket": "<your-bucket-name>.appspot.com"
+    })
 
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-print("ROLE:", supabase.auth.get_user())
+bucket = storage.bucket()
 
-
-def upload_to_supabase(file_path, file_name=None):
-    """Uploads a file to Supabase Storage and returns its public URL."""
-    
+def upload_to_firebase(file_path, file_name=None):
     file_name = file_name or os.path.basename(file_path)
+    blob = bucket.blob(file_name)
 
-    with open(file_path, "rb") as f:
-        supabase.storage.from_(BUCKET_NAME).upload(
-            file_name, f, {"content-type": "application/octet-stream"}
-        )
+    blob.upload_from_filename(file_path)
+    blob.make_public()  # optional
 
-    # Get public URL
-    public_url = supabase.storage.from_(BUCKET_NAME).get_public_url(file_name)
-    return public_url
+    return blob.public_url

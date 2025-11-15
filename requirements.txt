@@ -7,5 +7,6 @@ python-docx
 easyocr
 imutils
 pypdf
-supabase
+firebase-admin
 gunicorn
+dotenv

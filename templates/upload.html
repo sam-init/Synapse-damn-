@@ -457,7 +457,8 @@
         <h2>Upload all claim files</h2>
         <p>Select all related files (insurance copy, FIR, damage photos) in one go. Backend will separate them.</p>
 
-        <form id="claim-form" method="post" enctype="multipart/form-data" action="#">
+        <form id="claim-form" method="post" enctype="multipart/form-data" action="/upload-files">
+
           <div class="form-row">
             <label for="all_files">Choose files</label>
             <div class="file-input-container" id="dropzone">
@@ -515,10 +516,27 @@
       fileInput.files = files;
     }, false);
 
-    document.getElementById('claim-form').addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Demo: Files would be uploaded here!');
-    });
+  document.getElementById('claim-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const formData = new FormData(document.getElementById('claim-form'));
+
+  const response = await fetch("/upload-files", {
+    method: "POST",
+    body: formData
+  });
+
+  const result = await response.json();
+
+  console.log(result);
+
+  if (result.status === "success") {
+    alert("Files uploaded to Google Drive successfully!");
+  } else {
+    alert("Upload failed: " + result.error);
+  }
+});
+
   </script>
 </body>
 </html>

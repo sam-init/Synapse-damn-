@@ -6,3 +6,6 @@ pymupdf
 python-docx
 easyocr
 imutils
+pypdf
+supabase
+gunicorn

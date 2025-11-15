@@ -1,23 +1,17 @@
-import firebase_admin
-from firebase_admin import credentials, storage
-import os
+from google_auth_oauthlib.flow import InstalledAppFlow
+import pickle
 
-# Path to your Firebase admin JSON
-cred = credentials.Certificate("firebase-admin.json")
+SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
-# Initialize Firebase
-if not firebase_admin._apps:
-    firebase_admin.initialize_app(cred, {
-        "storageBucket": "<your-bucket-name>.appspot.com"
-    })
+flow = InstalledAppFlow.from_client_secrets_file(
+    "client_secret.json",
+    SCOPES
+)
 
-bucket = storage.bucket()
+creds = flow.run_local_server(port=0)
 
-def upload_to_firebase(file_path, file_name=None):
-    file_name = file_name or os.path.basename(file_path)
-    blob = bucket.blob(file_name)
+# Save login session
+with open("token.pickle", "wb") as f:
+    pickle.dump(creds, f)
 
-    blob.upload_from_filename(file_path)
-    blob.make_public()  # optional
-
-    return blob.public_url
+print("Login success. Token saved.")

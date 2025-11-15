@@ -457,7 +457,7 @@
         <h2>Upload all claim files</h2>
         <p>Select all related files (insurance copy, FIR, damage photos) in one go. Backend will separate them.</p>
 
-        <form id="claim-form" method="post" enctype="multipart/form-data" action="/upload-files">
+        <form id="claim-form" method="post" enctype="multipart/form-data" action="/process-claim">
 
           <div class="form-row">
             <label for="all_files">Choose files</label>
@@ -471,17 +471,14 @@
           </div>
 
           <div class="form-actions">
-            <button class="btn" type="submit">Upload Files</button>
-            <div class="uploader-note">
-              We'll connect this form to Google Drive / Sheets later (Apps Script). For demo, uploads are mocked.
-            </div>
+            <button class="btn" type="submit">Upload & Process</button>
           </div>
         </form>
       </section>
     </main>
 
     <footer>
-      <strong>Team DAMM</strong> • Demo UI — Backend integration pending. This page only accepts files in one input.
+      <strong>Team DAMM</strong> • Fully integrated backend version
     </footer>
   </div>
 
@@ -516,27 +513,34 @@
       fileInput.files = files;
     }, false);
 
-  document.getElementById('claim-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
+    // ------------------------------
+    // SUBMIT HANDLER → CALL /process-claim
+    // ------------------------------
+    document.getElementById('claim-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-  const formData = new FormData(document.getElementById('claim-form'));
+      const formData = new FormData(document.getElementById('claim-form'));
 
-  const response = await fetch("/upload-files", {
-    method: "POST",
-    body: formData
-  });
+      const response = await fetch("/process-claim", {
+        method: "POST",
+        body: formData
+      });
 
-  const result = await response.json();
+      const result = await response.json();
+      console.log(result);
 
-  console.log(result);
+      if (result.agent) {
+        // Save result for viewing
+        localStorage.setItem("claim_result", JSON.stringify(result));
 
-  if (result.status === "success") {
-    alert("Files uploaded to Google Drive successfully!");
-  } else {
-    alert("Upload failed: " + result.error);
-  }
-});
-
+        // Redirect to results page
+        window.location.href = "/results.html";
+      } else {
+        alert("Processing failed: " + JSON.stringify(result));
+      }
+    });
   </script>
+</body>
+
 </body>
 </html>

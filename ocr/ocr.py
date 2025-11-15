@@ -97,5 +97,5 @@ def extract_claim_fields(file_path):
 # TEST
 # ---------------------------------------------------
 if __name__ == "__main__":
-    out = extract_claim_fields("your_input_file.pdf")  # or .jpg, .png
+    out = extract_claim_fields("IMG_20251115_132123.jpg")  # or .jpg, .png
     print("OUTPUT:\n", out)

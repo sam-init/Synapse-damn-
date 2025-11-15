@@ -54,7 +54,7 @@
     .logo{
       height:60px;
       width:200px;
-      background:url('./assets/images/logo.png') no-repeat left center;
+      background:url('{{ url_for("static", filename="logo.png") }}') no-repeat left center;
       background-size:contain;
       transition: transform 0.3s ease;
     }

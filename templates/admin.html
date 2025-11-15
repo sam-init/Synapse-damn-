@@ -1,768 +1,136 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FinSecure — Admin Dashboard</title>
-  <style>
-    :root{
-      --brand-red: #b91c1c;
-      --brand-navy:#1e3a8a;
-      --bg:#f8fafc;
-      --card: #ffffff;
-      --card-hover: #f1f5f9;
-      --muted:#64748b;
-      --accent:#3b82f6;
-      --border: #e2e8f0;
-      --radius:12px;
-      --shadow: 0 4px 20px rgba(0,0,0,0.08);
-      --maxwidth:1280px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-      color:#1e293b;
-      line-height:1.6;
-      -webkit-font-smoothing:antialiased;
-      padding:24px;
-      min-height:100vh;
-    }
+<meta charset="utf-8">
+<title>FinSecure — Admin Dashboard</title>
 
-    .wrap{width:100%;max-width:var(--maxwidth);margin:0 auto}
+<style>
+/* CLEANED + FUNCTIONAL */
+body{
+  font-family: Arial, sans-serif;
+  background:#f3f4f6;
+  padding:20px;
+}
+.navbar{
+  display:flex;
+  justify-content:space-between;
+  padding:14px;
+  background:white;
+  border-radius:8px;
+  margin-bottom:20px;
+}
+.nav-link{
+  margin-right:14px;
+  font-weight:bold;
+}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:8px;
+  margin-bottom:20px;
+}
+.claim{
+  border:1px solid #ddd;
+  padding:16px;
+  border-radius:8px;
+  margin-bottom:14px;
+  display:flex;
+  gap:16px;
+}
+.claim img{
+  width:140px;
+  height:90px;
+  object-fit:cover;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+.badge{
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:bold;
+}
+.badge.auto{background:#d1fae5;color:#065f46;}
+.badge.flagged{background:#fee2e2;color:#991b1b;}
+.badge.pending{background:#e0f2fe;color:#0369a1;}
+.btn{
+  padding:8px 12px;
+  margin-right:8px;
+  border-radius:6px;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+  color:white;
+}
+.btn.approve{background:#059669;}
+.btn.reject{background:#dc2626;}
+.btn.review{background:#2563eb;}
+</style>
 
-    /* HEADER */
-    header.site-header{margin-bottom:32px;animation: fadeInDown 0.6s ease-out}
-    .navbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:20px 24px;
-      background:var(--card);
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-      box-shadow:var(--shadow);
-    }
-
-    .navbar-brand {
-      display: flex;
-      align-items: center;
-      height: 60px;
-      width: 220px;
-      background: url('./assets/images/logo.png') no-repeat left center;
-      background-size: contain;
-      transition: transform 0.3s ease;
-    }
-    .navbar-brand:hover{transform:scale(1.05)}
-
-    .nav-right{display:flex;align-items:center;gap:20px}
-    .nav-link{
-      color:var(--muted);
-      text-decoration:none;
-      font-weight:600;
-      font-size:14px;
-      padding:8px 16px;
-      border-radius:8px;
-      transition: all 0.3s ease;
-    }
-    .nav-link:hover{
-      background:rgba(59,130,246,0.1);
-      color:var(--accent);
-    }
-    .contact{
-      color:var(--brand-red);
-      font-weight:700;
-      font-size:15px;
-      padding:8px 16px;
-      background:rgba(185,28,28,0.06);
-      border-radius:8px;
-      border:1px solid rgba(185,28,28,0.15);
-    }
-
-    /* MAIN CARD */
-    main.main{animation: fadeInUp 0.6s ease-out 0.2s both}
-
-    .card{
-      background:var(--card);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:32px;
-      border:1px solid var(--border);
-      position:relative;
-      overflow:hidden;
-      transition: all 0.3s ease;
-    }
-
-    .card::before{
-      content:'';
-      position:absolute;
-      top:0;
-      left:0;
-      right:0;
-      height:4px;
-      background:linear-gradient(90deg,#b91c1c,#3b82f6);
-    }
-
-    /* ADMIN HEADER */
-    .admin-header{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      margin-bottom:32px;
-      flex-wrap:wrap;
-      gap:20px;
-    }
-
-    .page-title{
-      font-size:28px;
-      color:#0f172a;
-      font-weight:700;
-      margin-bottom:4px;
-    }
-
-    .admin-controls{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .hint{
-      font-size:13px;
-      color:var(--muted);
-      font-weight:600;
-    }
-
-    .select{
-      padding:10px 16px;
-      border-radius:8px;
-      border:1px solid var(--border);
-      background:white;
-      font-size:14px;
-      font-weight:500;
-      color:#1e293b;
-      cursor:pointer;
-      transition: all 0.3s ease;
-      box-shadow:0 2px 4px rgba(0,0,0,0.04);
-    }
-    .select:hover{
-      border-color:var(--accent);
-      box-shadow:0 4px 8px rgba(59,130,246,0.15);
-    }
-    .select:focus{
-      outline:none;
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(59,130,246,0.1);
-    }
-
-    /* CLAIMS GRID */
-    .claims-grid{
-      display:grid;
-      grid-template-columns:repeat(auto-fit, minmax(550px, 1fr));
-      gap:20px;
-    }
-
-    .claim-card{
-      background:var(--card);
-      border-radius:12px;
-      border:1px solid var(--border);
-      padding:20px;
-      transition: all 0.3s ease;
-      box-shadow:0 2px 8px rgba(0,0,0,0.04);
-    }
-    .claim-card:hover{
-      transform:translateY(-2px);
-      box-shadow:0 8px 24px rgba(0,0,0,0.12);
-      border-color:var(--accent);
-    }
-
-    .claim-preview{display:flex;gap:16px}
-
-    .thumb-grid{
-      width:140px;
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:8px;
-      flex-shrink:0;
-    }
-    .thumb-grid img{
-      width:100%;
-      height:70px;
-      object-fit:cover;
-      border-radius:8px;
-      border:1px solid var(--border);
-      transition: transform 0.3s ease;
-    }
-    .thumb-grid img:hover{transform:scale(1.05)}
-
-    .claim-body{
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-    }
-
-    .claim-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:flex-start;
-      gap:12px;
-    }
-
-    .claim-id{
-      font-weight:700;
-      font-size:16px;
-      color:#0f172a;
-    }
-
-    .claim-meta{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:2px;
-    }
-
-    .claim-flag{
-      font-weight:700;
-      font-size:12px;
-      padding:6px 12px;
-      border-radius:6px;
-      white-space:nowrap;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-    }
-    .claim-flag.serious{
-      background:linear-gradient(135deg,#dc2626,#b91c1c);
-      color:white;
-      box-shadow:0 2px 8px rgba(185,28,28,0.3);
-    }
-    .claim-flag.self{
-      background:linear-gradient(135deg,#10b981,#059669);
-      color:white;
-      box-shadow:0 2px 8px rgba(16,185,129,0.3);
-    }
-    .claim-flag.fraud{
-      background:linear-gradient(135deg,#f59e0b,#f97316);
-      color:white;
-      box-shadow:0 2px 8px rgba(245,158,11,0.3);
-    }
-
-    .claim-description{
-      font-size:14px;
-      color:var(--muted);
-      line-height:1.6;
-    }
-
-    .claim-actions{
-      display:flex;
-      gap:8px;
-      justify-content:flex-end;
-      flex-wrap:wrap;
-    }
-
-    .btn{
-      background:linear-gradient(135deg,#b91c1c,#dc2626);
-      color:white;
-      padding:10px 16px;
-      border-radius:8px;
-      border:0;
-      font-weight:600;
-      font-size:14px;
-      cursor:pointer;
-      transition: all 0.3s ease;
-      box-shadow:0 2px 8px rgba(185,28,28,0.25);
-    }
-    .btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 4px 12px rgba(185,28,28,0.35);
-    }
-    .btn:active{transform:translateY(0)}
-
-    .btn.small{
-      padding:8px 14px;
-      font-size:13px;
-    }
-
-    .btn.ghost{
-      background:transparent;
-      border:1px solid var(--border);
-      color:var(--muted);
-      box-shadow:none;
-    }
-    .btn.ghost:hover{
-      background:var(--card-hover);
-      border-color:var(--accent);
-      color:var(--accent);
-      box-shadow:0 2px 8px rgba(59,130,246,0.15);
-    }
-
-    /* DETAIL CARD */
-    .detail-card{
-      margin-top:24px;
-      animation: fadeInDetail 0.35s ease-out both;
-    }
-
-    .detail-grid{
-      display:flex;
-      gap:24px;
-    }
-
-    .detail-media{
-      flex:1;
-    }
-    .detail-media > img{
-      width:100%;
-      border-radius:12px;
-      margin-bottom:12px;
-      border:1px solid var(--border);
-    }
-
-    .thumb-row{
-      display:flex;
-      gap:10px;
-    }
-    .thumb-row img{
-      width:120px;
-      height:80px;
-      object-fit:cover;
-      border-radius:8px;
-      border:1px solid var(--border);
-      cursor:pointer;
-      transition: all 0.3s ease;
-    }
-    .thumb-row img:hover{
-      transform:scale(1.05);
-      border-color:var(--accent);
-    }
-
-    .detail-side{
-      width:380px;
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      flex-shrink:0;
-    }
-
-    .detail-head{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .detail-head h3{
-      font-size:22px;
-      color:#0f172a;
-    }
-    .detail-head .status{
-      font-weight:700;
-      font-size:13px;
-      padding:6px 12px;
-      border-radius:6px;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-    }
-    .detail-head .status.flagged{
-      background:rgba(185,28,28,0.1);
-      color:var(--brand-red);
-    }
-    .detail-head .status.auto-approve{
-      background:rgba(16,185,129,0.1);
-      color:#059669;
-    }
-
-    .kv{
-      background:#f8fafc;
-      padding:14px;
-      border-radius:10px;
-      border:1px solid var(--border);
-    }
-    .kv strong{
-      display:block;
-      font-size:12px;
-      color:var(--muted);
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-      margin-bottom:4px;
-    }
-    .kv .muted{
-      font-size:15px;
-      color:#1e293b;
-      font-weight:600;
-    }
-
-    .info-box{
-      background:white;
-      padding:14px;
-      border-radius:10px;
-      border:1px solid var(--border);
-    }
-    .info-box-title{
-      font-weight:700;
-      font-size:13px;
-      color:#0f172a;
-      margin-bottom:6px;
-      text-transform:uppercase;
-      letter-spacing:0.5px;
-    }
-    .info-box-content{
-      font-size:14px;
-      color:var(--muted);
-      line-height:1.6;
-    }
-
-    /* FOOTER */
-    footer{
-      margin-top:32px;
-      text-align:center;
-      color:var(--muted);
-      font-size:13px;
-      padding:20px;
-      background:var(--card);
-      border-radius:var(--radius);
-      border:1px solid var(--border);
-    }
-    footer strong{color:#0f172a}
-
-    .muted{color:var(--muted)}
-
-    /* ANIMATIONS */
-    @keyframes fadeInDown{
-      from{opacity:0;transform:translateY(-20px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    @keyframes fadeInUp{
-      from{opacity:0;transform:translateY(20px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-    @keyframes fadeInDetail{
-      from{opacity:0;transform:translateY(12px)}
-      to{opacity:1;transform:translateY(0)}
-    }
-
-    /* RESPONSIVE */
-    @media (max-width:1200px){
-      .claims-grid{grid-template-columns:1fr}
-      .detail-grid{flex-direction:column}
-      .detail-side{width:100%}
-    }
-
-    @media (max-width:768px){
-      body{padding:16px}
-      .card{padding:20px}
-      .navbar{
-        flex-direction:column;
-        gap:16px;
-        padding:16px;
-        align-items:flex-start;
-      }
-      .nav-right{
-        width:100%;
-        flex-wrap:wrap;
-        justify-content:flex-start;
-      }
-      .navbar-brand{
-        height:50px;
-        width:180px;
-      }
-      .admin-header{
-        flex-direction:column;
-        align-items:flex-start;
-      }
-      .admin-controls{
-        width:100%;
-        flex-direction:column;
-        align-items:stretch;
-      }
-      .select{width:100%}
-      .page-title{font-size:24px}
-      .claims-grid{grid-template-columns:1fr;gap:16px}
-      .claim-preview{flex-direction:column}
-      .thumb-grid{width:100%}
-      .claim-actions{justify-content:flex-start}
-      .thumb-row{flex-wrap:wrap}
-    }
-
-    @media (max-width:480px){
-      body{padding:12px}
-      .card{padding:16px}
-      .navbar{padding:12px}
-      .navbar-brand{height:45px;width:160px}
-      .page-title{font-size:20px}
-      .claim-card{padding:14px}
-      .claim-head{flex-direction:column;gap:8px}
-      .claim-flag{align-self:flex-start}
-      .btn{width:100%;justify-content:center}
-      .btn.small{width:auto;flex:1}
-      .detail-side{gap:12px}
-      footer{padding:16px;font-size:12px}
-    }
-  </style>
 </head>
+
 <body>
-  <div class="wrap">
-    <header class="site-header">
-      <nav class="navbar">
-        <a class="navbar-brand" href="#" aria-label="FinSecure home"></a>
-        <div class="nav-right">
-          <a class="nav-link" href="./index.html">Home</a>
-          <div class="contact">Contact No</div>
-        </div>
-      </nav>
-    </header>
 
-    <main class="main">
-      <section class="card admin">
-        <div class="admin-header">
-          <div>
-            <h2 class="page-title">Admin Dashboard</h2>
-            <div class="muted">Review incoming claims, prioritize, and take action</div>
-          </div>
-
-          <div class="admin-controls">
-            <div class="hint">Filters:</div>
-            <select id="filter-status" class="select">
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="flagged">Flagged</option>
-              <option value="approved">Approved</option>
-            </select>
-            <select id="filter-priority" class="select">
-              <option value="all">Priority: All</option>
-              <option value="serious">Serious</option>
-              <option value="self">Self-Damaged</option>
-              <option value="small">Small</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Claims grid -->
-        <div id="claims-grid" class="claims-grid">
-
-          <!-- Claim Card 1: Serious -->
-          <article class="claim-card" data-status="pending" data-priority="serious">
-            <div class="claim-preview">
-              <div class="thumb-grid">
-                <img src="https://placehold.co/160x100?text=img1" alt="img1" />
-                <img src="https://placehold.co/160x100?text=img2" alt="img2" />
-              </div>
-
-              <div class="claim-body">
-                <div class="claim-head">
-                  <div>
-                    <div class="claim-id">CLAIM-2001</div>
-                    <div class="claim-meta">2025-11-15 • POL765432</div>
-                  </div>
-                  <div class="claim-flag serious">Serious</div>
-                </div>
-
-                <p class="claim-description">OCR: "Totaled vehicle" • FIR: attached • Rule: auto-flag (totaled + severe)</p>
-
-                <div class="claim-actions">
-                  <button class="btn small" data-action="review">Send to Review</button>
-                  <button class="btn small ghost" data-action="reject">Reject</button>
-                  <button class="btn small ghost" data-action="view" data-target="#detail-2001">View Details</button>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- Claim Card 2: Self damaged -->
-          <article class="claim-card" data-status="pending" data-priority="self">
-            <div class="claim-preview">
-              <div class="thumb-grid">
-                <img src="https://placehold.co/160x100?text=img3" alt="img3" />
-                <img src="https://placehold.co/160x100?text=img4" alt="img4" />
-              </div>
-
-              <div class="claim-body">
-                <div class="claim-head">
-                  <div>
-                    <div class="claim-id">CLAIM-2002</div>
-                    <div class="claim-meta">2025-11-14 • POL123789</div>
-                  </div>
-                  <div class="claim-flag self">Self-Damaged</div>
-                </div>
-
-                <p class="claim-description">OCR: "Minor fender bender" • CV: Minor Scratch • Rule: auto-approve</p>
-
-                <div class="claim-actions">
-                  <button class="btn small" data-action="approve">Approve</button>
-                  <button class="btn small ghost" data-action="view" data-target="#detail-2002">View Details</button>
-                </div>
-              </div>
-            </div>
-          </article>
-
-          <!-- Claim Card 3: Fraud Review -->
-          <article class="claim-card" data-status="flagged" data-priority="self">
-            <div class="claim-preview">
-              <div class="thumb-grid">
-                <img src="https://placehold.co/160x100?text=img5" alt="img5" />
-                <img src="https://placehold.co/160x100?text=img6" alt="img6" />
-              </div>
-
-              <div class="claim-body">
-                <div class="claim-head">
-                  <div>
-                    <div class="claim-id">CLAIM-2003</div>
-                    <div class="claim-meta">2025-11-12 • POL555222</div>
-                  </div>
-                  <div class="claim-flag fraud">Fraud Review</div>
-                </div>
-
-                <p class="claim-description">OCR: "Severe Collision" vs CV: Minor Scratch • Rule: mismatch → fraud review</p>
-
-                <div class="claim-actions">
-                  <button class="btn small" data-action="mark-fraud">Mark Fraud</button>
-                  <button class="btn small ghost" data-action="view" data-target="#detail-2003">View Details</button>
-                </div>
-              </div>
-            </div>
-          </article>
-
-        </div>
-
-      </section>
-
-      <!-- DETAIL MODAL 2001 -->
-      <section id="detail-2001" class="card detail-card" style="display:none">
-        <div class="detail-grid">
-          <div class="detail-media">
-            <img src="https://placehold.co/900x500?text=damage+large" alt="large" />
-            <div class="thumb-row">
-              <img src="https://placehold.co/160x100?text=img1" alt="t1" />
-              <img src="https://placehold.co/160x100?text=img2" alt="t2" />
-            </div>
-          </div>
-          <aside class="detail-side">
-            <div class="detail-head">
-              <h3>CLAIM-2001</h3>
-              <div class="status flagged">Flagged</div>
-            </div>
-
-            <div class="kv">
-              <strong>Policy Number</strong>
-              <div class="muted">POL765432</div>
-            </div>
-
-            <div class="info-box">
-              <div class="info-box-title">OCR Extract</div>
-              <div class="info-box-content">"Totaled vehicle. Estimated total loss."</div>
-            </div>
-
-            <div class="info-box">
-              <div class="info-box-title">CV Detection</div>
-              <div class="info-box-content">Severe Collision (0.92) • Location: Rear</div>
-            </div>
-
-            <div style="display:flex;gap:10px;margin-top:8px">
-              <button class="btn" data-action="send-review" style="flex:1">Send to Priority Review</button>
-              <button class="btn ghost" data-action="reject">Reject</button>
-+              <button class="btn ghost" data-action="close">Close</button>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <!-- DETAIL MODAL 2002 -->
-      <section id="detail-2002" class="card detail-card" style="display:none">
-        <div class="detail-grid">
-          <div class="detail-media">
-            <img src="https://placehold.co/900x500?text=minor+damage" alt="large" />
-            <div class="thumb-row">
-              <img src="https://placehold.co/160x100?text=img3" alt="t1" />
-              <img src="https://placehold.co/160x100?text=img4" alt="t2" />
-            </div>
-          </div>
-          <aside class="detail-side">
-            <div class="detail-head">
-              <h3>CLAIM-2002</h3>
-              <div class="status auto-approve">Auto-Approve</div>
-            </div>
-
-            <div class="kv">
-              <strong>Policy Number</strong>
-              <div class="muted">POL123789</div>
-            </div>
-
-            <div class="info-box">
-              <div class="info-box-title">OCR Extract</div>
-              <div class="info-box-content">"Minor fender bender at 3pm. No injuries."</div>
-            </div>
-
-            <div style="display:flex;gap:10px;margin-top:8px">
-              <button class="btn" data-action="approve" style="flex:1">Approve Claim</button>
-              <button class="btn ghost" data-action="close">Close</button>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-    </main>
-
-    <footer>
-      <strong>Team DAMM</strong> • Demo UI — © 2025 FinSecure
-    </footer>
+<nav class="navbar">
+  <div>
+    <a class="nav-link" href="/">Home</a>
+    <a class="nav-link" href="/upload">Upload</a>
+    <a class="nav-link" href="/admin">Admin</a>
   </div>
+</nav>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      const statusFilter = document.getElementById('filter-status');
-      const priorityFilter = document.getElementById('filter-priority');
-      const claimsGrid = document.getElementById('claims-grid');
+<h2>Admin Dashboard</h2>
+<p>Review incoming claims and take action.</p>
 
-      function applyFilters(){
-        const s = statusFilter.value;
-        const p = priorityFilter.value;
-        const cards = claimsGrid.querySelectorAll('article.claim-card');
-        cards.forEach(c => {
-          const cs = c.dataset.status || 'pending';
-          const cp = c.dataset.priority || 'small';
-          let show = true;
-          if(s !== 'all' && cs !== s) show = false;
-          if(p !== 'all' && cp !== p) show = false;
-          c.style.display = show ? '' : 'none';
-        });
-      }
-      statusFilter.addEventListener('change', applyFilters);
-      priorityFilter.addEventListener('change', applyFilters);
+<div class="card">
+  <h3>Incoming Claims</h3>
 
-      // Hide all detail cards initially
-      document.querySelectorAll('.detail-card').forEach(el => el.style.display = 'none');
+  {% if claims|length == 0 %}
+      <p>No claims submitted yet.</p>
+  {% endif %}
 
-      document.querySelectorAll('button[data-action]').forEach(btn => {
-        btn.addEventListener('click', e => {
-          const action = btn.dataset.action;
-          if(action === 'view'){
-            // Hide all details first
-            document.querySelectorAll('.detail-card').forEach(el => el.style.display = 'none');
-            // Show target detail
-            const tgt = btn.dataset.target;
-            const el = document.querySelector(tgt);
-            if(el) {
-              el.style.display = 'block';
-              el.scrollIntoView({behavior:'smooth',block:'start'});
-            }
-          } else if(action === 'close'){
-            // Close detail view
-            e.target.closest('.detail-card').style.display = 'none';
-          } else {
-            showToast('Action: ' + action);
-          }
-        })
-      });
-    });
-    function showToast(message){
-      let toast=document.createElement('div');
-      toast.textContent=message;
-      toast.style.position='fixed';toast.style.bottom='20px';toast.style.right='20px';
-      toast.style.background='linear-gradient(135deg,#3b82f6,#1e40af)';
-      toast.style.color='white';toast.style.padding='12px 18px';toast.style.borderRadius='8px';
-      toast.style.fontWeight='600';toast.style.boxShadow='0 4px 12px rgba(0,0,0,0.25)';
-      toast.style.opacity='0';toast.style.transition='opacity 0.3s ease';
-      document.body.appendChild(toast);
-      setTimeout(()=>toast.style.opacity='1',10);
-      setTimeout(()=>{toast.style.opacity='0';setTimeout(()=>toast.remove(),300)},2500);
-    }
+  {% for c in claims %}
+  <div class="claim" id="{{ c.claim_id }}">
+    <img src="{{ c.uploaded_files[0] | replace('uploads','/static_claims') }}" />
+
+    <div style="flex:1">
+      <h3>{{ c.claim_id }}</h3>
+      <div class="badge 
+        {% if 'Auto-Approve' in c.agent %}auto
+        {% elif 'Flag' in c.agent %}flagged
+        {% else %}pending
+        {% endif %}
+      ">
+        {{ c.agent }}
+      </div>
+
+      <p><strong>Policy:</strong> {{ c.ocr.policy_number }}</p>
+      <p><strong>Description:</strong> {{ c.ocr.incident_description }}</p>
+      <p><strong>Damage:</strong> {{ c.cnn.damage_label }} ({{ (c.cnn.confidence*100)|round(1) }}%)</p>
+
+      <div>
+        <button class="btn approve" onclick="adminAction('{{ c.claim_id }}', 'approve')">Approve</button>
+        <button class="btn review" onclick="adminAction('{{ c.claim_id }}', 'review')">Send to Review</button>
+        <button class="btn reject" onclick="adminAction('{{ c.claim_id }}', 'reject')">Reject</button>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+function adminAction(claim_id, action) {
+  fetch("/admin/action", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({claim_id, action})
+  })
+  .then(r => r.json())
+  .then(res => {
+    alert("Action applied: " + action.toUpperCase());
+  });
+}
 </script>
+
 </body>
 </html>

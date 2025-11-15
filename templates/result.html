@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinSecure — Claim Results</title>
+  <style>
+    :root{
+      --brand-red: #b91c1c;
+      --brand-navy:#1e3a8a;
+      --bg:#f8fafc;
+      --card: #ffffff;
+      --muted:#64748b;
+      --accent:#3b82f6;
+      --border: #e2e8f0;
+      --radius:12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --maxwidth:1100px;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family: 'Inter', system-ui, Arial;
+      background: linear-gradient(135deg,var(--bg) 0%, #eaf0f6 100%);
+      color:#0f172a;
+      padding:24px;
+      min-height:100vh;
+    }
+
+    .wrap{max-width:var(--maxwidth);margin:0 auto}
+
+    .navbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:18px 20px;background:var(--card);
+      border-radius:var(--radius);border:1px solid var(--border);
+      box-shadow:var(--shadow);margin-bottom:28px;
+    }
+
+    .navbar-brand{
+      height:56px;width:220px;
+      background:url('{{ url_for("static", filename="logo.png") }}') no-repeat left center;
+      background-size:contain
+    }
+
+    .nav-right{display:flex;align-items:center;gap:14px}
+    .nav-link{color:var(--muted);text-decoration:none;font-weight:600;padding:8px 12px;border-radius:8px}
+    .nav-link:hover{background:rgba(59,130,246,0.08);color:var(--accent)}
+    .user-info{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:10px;background:rgba(59,130,246,0.06)}
+    .avatar{width:38px;height:38px;border-radius:8px;background:#3b82f6;display:flex;align-items:center;justify-content:center;color:white;font-weight:800}
+
+    .page-title{font-size:22px;font-weight:800}
+
+    .results-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:12px}
+
+    .claim-row{
+      display:flex;gap:16px;align-items:center;padding:12px;
+      border-radius:10px;background:var(--card);
+      border:1px solid var(--border);box-shadow:0 4px 12px rgba(2,6,23,0.03)
+    }
+
+    .claim-thumb img{
+      width:120px;height:80px;object-fit:cover;
+      border-radius:8px;border:1px solid var(--border)
+    }
+
+    .badge{
+      padding:6px 10px;border-radius:8px;font-weight:700;font-size:12px;text-transform:uppercase;
+      letter-spacing:0.4px
+    }
+    .badge.auto{background:rgba(234,179,8,0.08);color:#b45309}
+    .badge.flagged{background:rgba(185,28,28,0.08);color:var(--brand-red)}
+    .badge.pending{background:rgba(59,130,246,0.08);color:var(--accent)}
+    .badge.approved{background:rgba(16,185,129,0.12);color:#059669}
+
+    .btn{background:#b91c1c;color:white;padding:8px 12px;border-radius:8px;border:0;font-weight:700;cursor:pointer}
+    .btn.ghost{background:none;border:1px solid var(--border);color:var(--muted)}
+
+    /* Detail Panel */
+    .detail-panel{
+      display:none;
+      margin-top:20px;padding:18px;
+      background:white;border:1px solid var(--border);
+      border-radius:12px;box-shadow:var(--shadow)
+    }
+
+    /* Chat Box */
+    #chat-box{
+      margin-top:24px;padding:16px;background:white;
+      border-radius:10px;border:1px solid var(--border)
+    }
+
+    #chat-log{
+      height:220px;overflow-y:auto;padding:10px;
+      border-radius:8px;border:1px solid var(--border);
+      background:#f8fafc;margin-bottom:12px
+    }
+
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav class="navbar">
+    <div class="navbar-brand"></div>
+    <div class="nav-right">
+<a class="nav-link" href="/">Home</a>
+<a class="nav-link" href="/upload">Upload</a>
+
+
+      <div class="user-info">
+        <div class="avatar">VT</div>
+        <div style="font-weight:700">VT</div>
+      </div>
+    </div>
+  </nav>
+
+  <h2 class="page-title">Claim Results</h2>
+
+  <!-- ========== CLAIM RESULTS ========== -->
+  <section id="results" class="results-grid"></section>
+
+  <!-- ========== DETAIL PANEL (generated dynamically) ========== -->
+  <section id="detail-panel" class="detail-panel"></section>
+
+  <!-- ========== CHAT BOX ========== -->
+  <section id="chat-box">
+    <h3>Ask the Claim Assistant</h3>
+    <div id="chat-log"></div>
+
+    <input id="chat-input" placeholder="Ask a question..." style="width:80%;padding:10px;border-radius:8px;border:1px solid #cbd5e1;">
+<button onclick="sendChat()" class="btn small">Send</button>
+
+  </section>
+
+</div>
+
+<script>
+(function(){
+
+  const data = JSON.parse(localStorage.getItem("claim_result"));
+  if(!data){
+    alert("No claim data found. Upload a claim first.");
+    location.href = "/upload";
+    return;
+  }
+
+  const { ocr, cnn, agent, uploaded_files } = data;
+
+  // Convert uploaded_files (strings) → URL paths
+  const fileUrls = uploaded_files.map(p => {
+      const filename = p.split("/").pop();
+      return "/static_claims/" + filename;
+  });
+
+  const results = document.getElementById("results");
+  const detailPanel = document.getElementById("detail-panel");
+
+  let triage = "Flagged", badgeClass="flagged";
+
+  if(agent.includes("Auto-Approve")){ triage="Auto-Approved"; badgeClass="auto"; }
+  else if(agent.includes("Flag for Review")){ triage="Flagged"; badgeClass="flagged"; }
+  else if(agent.includes("High Priority")){ triage="High Priority"; badgeClass="pending"; }
+  else if(agent.includes("Fraud Risk")){ triage="Fraud Risk"; badgeClass="flagged"; }
+
+  const claimId = "CLAIM-" + Date.now();
+
+  // Build Claim Row
+  results.innerHTML = `
+    <article class="claim-row" id="${claimId}">
+      <div class="claim-thumb">
+        <img src="${fileUrls[0]}" alt="damage">
+      </div>
+
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between">
+          <div>
+            <div style="font-weight:800">${claimId}</div>
+            <div style="color:var(--muted);font-size:13px">
+              Submitted: ${new Date().toLocaleDateString()} • Policy: ${ocr.policy_number}
+            </div>
+          </div>
+          <div>
+            <div class="badge ${badgeClass}">${triage}</div>
+            <div class="small" style="margin-top:6px">Severity: ${cnn.damage_label}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:8px;color:var(--muted);font-size:14px">
+          OCR: "${ocr.incident_description}" • CNN: ${cnn.damage_label} (${(cnn.confidence*100).toFixed(1)}%)
+        </div>
+
+        <button class="btn small" onclick="openDetails()">View</button>
+      </div>
+    </article>
+  `;
+
+  // Build Detail Panel (FIXED)
+  window.openDetails = function(){
+    detailPanel.style.display = "block";
+    detailPanel.innerHTML = `
+      <h3>${claimId} — Details</h3><br>
+
+      <img src="${fileUrls[0]}" style="max-width:400px;border-radius:12px"><br><br>
+
+      <b>Policy</b><br>${ocr.policy_number}<br><br>
+
+      <b>OCR Extract</b><br>${ocr.incident_description}<br><br>
+
+      <b>CNN Detection</b><br>${cnn.damage_label} (${(cnn.confidence*100).toFixed(1)}%)<br><br>
+
+      <b>Agent Decision</b><br>${agent}<br><br>
+
+      <button class="btn ghost" onclick="detailPanel.style.display='none'">Close</button>
+    `;
+    detailPanel.scrollIntoView({behavior:"smooth"});
+  };
+
+})();
+</script>
+
+
+<!-- ========== CHAT SCRIPT ========== -->
+<script>
+async function sendChat() {
+  const input = document.getElementById("chat-input");
+  const chatLog = document.getElementById("chat-log");
+
+  const text = input.value.trim();
+  if (!text) return;
+
+  chatLog.innerHTML += `<div><strong>You:</strong> ${text}</div>`;
+  chatLog.scrollTop = chatLog.scrollHeight;
+
+  input.value = "";
+
+  const stored = JSON.parse(localStorage.getItem("claim_result"));
+  if (!stored) {
+    chatLog.innerHTML += `<div style='color:red'>No claim data found.</div>`;
+    return;
+  }
+
+  const body = {
+    question: text,
+    form_data: stored.ocr,
+    image_data: stored.cnn
+  };
+
+  const response = await fetch("/ask-agent", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  const result = await response.json();
+  const reply = result.reply || "No reply from agent.";
+
+  chatLog.innerHTML += `<div><strong>Agent:</strong> ${reply}</div>`;
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+</script>
+
+
+</body>
+</html>

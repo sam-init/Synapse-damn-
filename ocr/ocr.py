@@ -97,5 +97,5 @@ def extract_claim_fields(file_path):
 # TEST
 # ---------------------------------------------------
 if __name__ == "__main__":
-    out = extract_claim_fields("IMG_20251115_132123.jpg")  # or .jpg, .png
+    out = extract_claim_fields("DocScanner 15-Nov-2025 1-12 pm.pdf")  # or .jpg, .png
     print("OUTPUT:\n", out)

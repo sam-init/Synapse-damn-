@@ -1,0 +1,21 @@
+{
+  "claim_id": "CLAIM-e8809a",
+  "ocr": "```json\n{\n  \"policy_number\": \"SGIB/MOTOR/PC/2024/9876543\",\n  \"incident_date\": \"14/11/2024\",\n  \"incident_description\": \"The Insured Vehicle was struck on the rear left side by another car while slowing down for a traffic signal. Damage to rear Bumper\"\n}\n```",
+  "cnn": {
+    "damage_label": "moderate",
+    "confidence": 0.9994462132453918,
+    "all_results": [
+      {
+        "file": "uploads/claims/0002.JPEG",
+        "label": "moderate",
+        "confidence": 0.9994462132453918
+      }
+    ]
+  },
+  "agent": "Based on the provided information, here's a summary of the case:\n\n**Claim Information:**\n- Policy number: SGIB/MOTOR/PC/2024/9876543\n- Incident date: 14/11/2024\n- Incident description: The Insured Vehicle was struck on the rear left side by another car while slowing down for a traffic signal. Damage to rear Bumper\n\n**Damage Analysis:**\n- Damage severity: Moderate\n- Confidence level: 99.94% (very high confidence)\n\nAfter reviewing the claim description and the damage analysis, I noticed that the damage description matches the reported incident - the rear bumper was damaged after being struck by another vehicle. This appears to be a legitimate claim with a clear cause of damage.\n\nHowever, there's a potential inconsistency between the reported incident and the level of damage detected by the analysis - the description mentions being struck while slowing down for a traffic signal, but the damage severity is classified as moderate, which might suggest a more extensive impact than expected.\n\nAs for fraud indicators, there aren't any red flags present at this point. The high confidence level in the damage analysis also suggests a lower likelihood of fraudulent activity.\n\nBased on this information, I'm inclined to classify this claim as:\n\n**Flag for Review**\n\nThis decision is based on the potential inconsistency between the reported incident and the level of damage detected, which requires further investigation to resolve any confusion or discrepancies.",
+  "uploaded_files": [
+    "uploads/claims/0002.JPEG",
+    "uploads/claims/DocScanner_15-Nov-2025_1-12_pm.pdf"
+  ],
+  "admin_action": "approve"
+}

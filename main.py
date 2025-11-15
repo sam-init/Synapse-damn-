@@ -6,89 +6,36 @@ from ocr.ocr import extract_claim_fields
 from agent.agent import run_agent
 from infer import load_model, predict
 
-app = Flask(__name__)
+cnn_model = load_model()
+
+# Serve uploaded images at /static_claims/<file>
+app = Flask(
+    __name__,
+    static_folder='uploads/claims'
+)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
-# ------------------ INDEX PAGE ------------------
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-# ------------------ OCR-ONLY ROUTE ------------------
-@app.route("/ocr-extract", methods=["POST"])
-def ocr_extract():
-    if "file" not in request.files:
-        return jsonify({"error": "No file uploaded"}), 400
-
-    file = request.files["file"]
-    filename = secure_filename(f"{uuid.uuid4()}_{file.filename}")
-    save_path = os.path.join(UPLOAD_FOLDER, filename)
-    file.save(save_path)
-
-    try:
-        ocr_result = extract_claim_fields(save_path)
-        return jsonify({"ocr_output": ocr_result})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-
-
-# -------------- FULL PIPELINE: PROCESS CLAIM --------------
-@app.route("/process-claim", methods=["POST"])
-def process_claim():
-    form_file = request.files.get("form")
-    damage_files = request.files.getlist("damage")
-
-    if not form_file:
-        return jsonify({"error": "Claim form missing"}), 400
-
-    # Save form file
-    form_filename = secure_filename(f"{uuid.uuid4()}_{form_file.filename}")
-    form_path = os.path.join(UPLOAD_FOLDER, form_filename)
-    form_file.save(form_path)
-
-    # Save damage images
-    damage_paths = []
-    for d in damage_files:
-        filename = secure_filename(f"{uuid.uuid4()}_{d.filename}")
-        path = os.path.join(UPLOAD_FOLDER, filename)
-        d.save(path)
-        damage_paths.append(path)
-
-    # OCR
-    form_data = extract_claim_fields(form_path)
-
-    # CNN placeholder
-    image_data = {
-        "damage_location": "PENDING",
-        "damage_severity": "PENDING"
-    }
-
-    # AI Agent
-    agent_reply = run_agent(form_data, image_data, question=None)
-
-    return jsonify({
-        "form_data": form_data,
-        "image_analysis": image_data,
-        "agent_reply": agent_reply
-    })
-
 @app.route("/login")
 def login():
     return render_template("login.html")
+
 
 @app.route("/upload")
 def upload_page():
     return render_template("upload.html")
 
-@app.route("/admin")
-def admin_page():
-    return render_template("admin.html")
 
+# -----------------------------
+# Upload Files (raw)
+# -----------------------------
 @app.route("/upload-files", methods=["POST"])
 def upload_files():
     if "all_files[]" not in request.files:
@@ -97,21 +44,17 @@ def upload_files():
     files = request.files.getlist("all_files[]")
     uploaded_files = []
 
-    # Create local upload directory if not exists
-    upload_dir = os.path.join(os.getcwd(), "uploads", "claims")
+    upload_dir = os.path.join("uploads", "claims")
     os.makedirs(upload_dir, exist_ok=True)
 
-    for file in files:
-        save_path = os.path.join(upload_dir, file.filename)
-        file.save(save_path)
-
-        # Convert to URL for frontend
-        file_url = f"/static_claims/{file.filename}"
+    for f in files:
+        save_path = os.path.join(upload_dir, secure_filename(f.filename))
+        f.save(save_path)
 
         uploaded_files.append({
-            "filename": file.filename,
-            "path": save_path,
-            "url": file_url
+            "filename": f.filename,
+            "path": save_path.replace("\\", "/"),
+            "url": "/static_claims/" + f.filename
         })
 
     return jsonify({
@@ -119,82 +62,157 @@ def upload_files():
         "uploaded_files": uploaded_files
     })
 
+
+# -----------------------------
+# Full pipeline: OCR + CNN + Agent
+# -----------------------------
 @app.route("/process-claim", methods=["POST"])
 def process_claim():
-    """
-    Pipeline:
-    1. Receive uploaded files
-    2. Pick OCR source (PDF/IMG)
-    3. Pick damage image
-    4. Run OCR
-    5. Run CNN
-    6. Feed into agent
-    """
 
     files = request.files.getlist("all_files[]")
     if not files:
         return {"error": "No files uploaded"}, 400
 
-    # Save locally
-    upload_dir = os.path.join(os.getcwd(), "uploads", "claims")
+    upload_dir = os.path.join("uploads", "claims")
     os.makedirs(upload_dir, exist_ok=True)
 
-    # Separate OCR file & damage files
-    ocr_source = None
-    damage_images = []
+    pdf_file = None
+    image_files = []
+    file_paths = []
 
-    saved_paths = []
-
+    # Separate PDF and images
     for f in files:
-        save_path = os.path.join(upload_dir, f.filename)
+        save_path = os.path.join(upload_dir, secure_filename(f.filename))
         f.save(save_path)
-        saved_paths.append(save_path)
+        file_paths.append(save_path)
 
-        if f.filename.lower().endswith((".pdf", ".jpg", ".jpeg", ".png")):
-            if "form" in f.filename.lower() or "claim" in f.filename.lower():
-                ocr_source = save_path
-            else:
-                damage_images.append(save_path)
+        if f.filename.lower().endswith(".pdf"):
+            pdf_file = save_path
+        else:
+            image_files.append(save_path)
 
-    if ocr_source is None:
-        ocr_source = saved_paths[0]  # fallback
+    if pdf_file is None:
+        return {"error": "No PDF uploaded"}, 400
 
-    if len(damage_images) == 0:
-        return {"error": "No damage images found"}, 400
+    if not image_files:
+        return {"error": "No image files"}, 400
 
-    # -------------------------
-    # 1. OCR extraction
-    # -------------------------
-    print("\nRunning OCR on:", ocr_source)
-    ocr_output = extract_claim_fields(ocr_source)
+    # OCR
+    print("Running OCR on:", pdf_file)
+    ocr_output = extract_claim_fields(pdf_file)
 
-    # -------------------------
-    # 2. CNN — take first damage image
-    # -------------------------
-    damage_path = damage_images[0]
-    print("\nRunning CNN on:", damage_path)
-    damage_label, confidence = predict(damage_path, cnn_model)
+    # CNN
+    cnn_outputs = []
+    for img in image_files:
+        label, conf = predict(img, cnn_model)
+        cnn_outputs.append({
+            "file": img,
+            "label": label,
+            "confidence": conf
+        })
 
-    cnn_output = {
-        "damage_label": damage_label,
-        "confidence": confidence
+    strongest = max(cnn_outputs, key=lambda x: x["confidence"])
+
+    cnn_final = {
+        "damage_label": strongest["label"],
+        "confidence": strongest["confidence"],
+        "all_results": cnn_outputs
     }
 
-    # -------------------------
-    # 3. Feed into Agent
-    # -------------------------
-    print("\nSending to Agent…")
-
+    # Agent
     agent_output = run_agent(
-        ocr_output,
-        cnn_output
+        form_data=ocr_output,
+        image_data=cnn_final,
+        question=None
     )
 
+    # Save JSON for admin
+    import json
+    claim_id = f"CLAIM-{uuid.uuid4().hex[:6]}"
+    json_path = os.path.join(upload_dir, f"{claim_id}.json")
+
+    with open(json_path, "w") as f:
+        json.dump({
+            "claim_id": claim_id,
+            "ocr": ocr_output,
+            "cnn": cnn_final,
+            "agent": agent_output,
+            "uploaded_files": file_paths
+        }, f, indent=2)
+
+    # FIXED: return URLs properly
+    uploaded_files_data = [
+        {
+            "path": p.replace("\\", "/"),
+            "url": "/static_claims/" + os.path.basename(p)
+        }
+        for p in file_paths
+    ]
+
     return {
+        "claim_id": claim_id,
         "ocr": ocr_output,
-        "cnn": cnn_output,
-        "agent": agent_output
+        "cnn": cnn_final,
+        "agent": agent_output,
+        "uploaded_files": uploaded_files_data
     }
+
+
+@app.route("/ask-agent", methods=["POST"])
+def ask_agent():
+    data = request.json
+    reply = run_agent(
+        form_data=data.get("form_data"),
+        image_data=data.get("image_data"),
+        question=data.get("question")
+    )
+    return jsonify({"reply": reply})
+
+
+@app.route("/result")
+def result_page():
+    return render_template("result.html")
+
+
+# -----------------------------
+# Admin: load all claims
+# -----------------------------
+@app.route("/admin")
+def admin_page():
+    claims = []
+    cdir = os.path.join("uploads", "claims")
+
+    for f in os.listdir(cdir):
+        if f.endswith(".json"):
+            import json
+            with open(os.path.join(cdir, f), "r") as jf:
+                claims.append(json.load(jf))
+
+    return render_template("admin.html", claims=claims)
+
+
+@app.route("/admin/action", methods=["POST"])
+def admin_action():
+    data = request.json
+    claim_id = data["claim_id"]
+    action = data["action"]
+
+    json_path = os.path.join("uploads", "claims", f"{claim_id}.json")
+
+    if not os.path.exists(json_path):
+        return {"error": "Claim not found"}, 404
+
+    import json
+    with open(json_path, "r") as f:
+        claim = json.load(f)
+
+    claim["admin_action"] = action
+
+    with open(json_path, "w") as f:
+        json.dump(claim, f, indent=2)
+
+    return {"status": "success"}
+
 
 if __name__ == "__main__":
     app.run(debug=True)

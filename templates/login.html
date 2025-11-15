@@ -68,7 +68,7 @@
     .logo{
       height:70px;
       width:220px;
-      background:url('logo.png') no-repeat left center;
+      background:url('{{ url_for("static", filename="logo.png") }}') no-repeat left center;
       background-size:contain;
       margin-bottom:16px;
     }

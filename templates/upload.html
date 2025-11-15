@@ -52,7 +52,7 @@
       align-items: center;
       height: 60px;
       width: 220px;
-      background: url('./assets/images/logo.png') no-repeat left center;
+      background:url('{{ url_for("static", filename="logo.png") }}') no-repeat left center;
       background-size: contain;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
@@ -443,8 +443,8 @@
       <nav class="navbar">
         <a class="navbar-brand" href="#" aria-label="FinSecure home"></a>
         <div class="nav-right">
-          <a class="nav-link" href="./index.html">Home</a>
-          <a class="nav-link" href="./result.html">My Claims</a>
+          <a class="nav-link" href="/">Home</a>
+          <a class="nav-link" href="/result">My Claims</a>
           <div class="user-info">
             <div class="avatar">VT</div>
             <div class="user-name">User Name</div>
@@ -535,7 +535,7 @@
         localStorage.setItem("claim_result", JSON.stringify(result));
 
         // Redirect to results page
-        window.location.href = "/results.html";
+        window.location.href = "/result";
       } else {
         alert("Processing failed: " + JSON.stringify(result));
       }

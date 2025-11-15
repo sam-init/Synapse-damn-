@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinSecure — User Upload</title>
+  <style>
+    :root{
+      --brand-red: #b91c1c;
+      --brand-navy:#1e3a8a;
+      --bg:#f8fafc;
+      --card: #ffffff;
+      --card-hover: #f1f5f9;
+      --muted:#64748b;
+      --accent:#3b82f6;
+      --border: #e2e8f0;
+      --radius:12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --maxwidth:960px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color:#1e293b;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      padding:24px;
+      display:flex;
+      justify-content:center;
+      min-height:100vh;
+    }
+
+    .wrap{width:100%;max-width:var(--maxwidth)}
+
+    /* HEADER */
+    header.site-header{margin-bottom:32px;animation: fadeInDown 0.6s ease-out}
+    .navbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:20px 24px;
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      height: 60px;
+      width: 220px;
+      background: url('./assets/images/logo.png') no-repeat left center;
+      background-size: contain;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .navbar-brand:hover{transform:scale(1.05);opacity:0.9}
+
+    .nav-right{display:flex;align-items:center;gap:24px}
+
+    .nav-link{
+      color:var(--muted);
+      text-decoration:none;
+      font-weight:600;
+      font-size:14px;
+      padding:8px 16px;
+      border-radius:8px;
+      transition: all 0.3s ease;
+    }
+    
+    .nav-link:hover{
+      background:rgba(59,130,246,0.1);
+      color:var(--accent);
+    }
+
+    .user-info{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 16px;
+      background:rgba(59,130,246,0.06);
+      border-radius:10px;
+      border:1px solid rgba(59,130,246,0.15);
+      transition: all 0.3s ease;
+    }
+    .user-info:hover{background:rgba(59,130,246,0.1);border-color:rgba(59,130,246,0.25)}
+    
+    .avatar{
+      width:42px;
+      height:42px;
+      border-radius:10px;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:white;
+      font-weight:700;
+      font-size:16px;
+      box-shadow:0 2px 8px rgba(59,130,246,0.25);
+    }
+    .user-name{color:#1e293b;font-size:14px;font-weight:600}
+
+    .contact-box{
+      display:flex;
+      flex-direction:column;
+      align-items:flex-end;
+      padding:8px 16px;
+      background:rgba(185,28,28,0.06);
+      border-radius:12px;
+      border:1px solid rgba(185,28,28,0.15);
+    }
+    .contact{color:#b91c1c;font-weight:700;font-size:15px}
+    .contact-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+
+    /* MAIN CARD */
+    main.container{animation: fadeInUp 0.6s ease-out 0.2s both}
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:40px;
+      border:1px solid var(--border);
+      position:relative;
+      overflow:hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover{transform:translateY(-2px);box-shadow:0 25px 60px rgba(0,0,0,0.4)}
+
+    .card::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      height:4px;
+      background:linear-gradient(90deg,#b91c1c,#3b82f6);
+    }
+
+    .upload h2{
+      font-size:28px;
+      margin-bottom:8px;
+      color:#0f172a;
+      font-weight:700;
+    }
+    .upload > p{margin-bottom:32px;color:var(--muted);font-size:15px}
+
+    form#claim-form{display:flex;flex-direction:column;gap:24px}
+    
+    .form-row{display:flex;flex-direction:column;gap:8px}
+    
+    label{
+      font-size:14px;
+      color:#334155;
+      font-weight:600;
+      letter-spacing:0.3px;
+    }
+
+    .file-input-container{
+      position:relative;
+      border:2px dashed var(--border);
+      border-radius:12px;
+      padding:48px 24px;
+      text-align:center;
+      background:#f8fafc;
+      transition: all 0.3s ease;
+      cursor:pointer;
+    }
+    .file-input-container:hover{
+      border-color:var(--accent);
+      background:#eff6ff;
+    }
+    .file-input-container.drag-over{
+      border-color:var(--brand-red);
+      background:#fef2f2;
+      transform:scale(1.01);
+    }
+
+    input[type=file]{
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      opacity:0;
+      cursor:pointer;
+    }
+
+    .upload-icon{
+      width:64px;
+      height:64px;
+      margin:0 auto 16px;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 12px rgba(59,130,246,0.25);
+    }
+    .upload-icon::before{
+      content:'📁';
+      font-size:32px;
+    }
+
+    .upload-text{
+      font-size:18px;
+      font-weight:600;
+      color:#0f172a;
+      margin-bottom:8px;
+    }
+    .upload-subtext{
+      font-size:14px;
+      color:var(--muted);
+    }
+
+    .hint{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:13px;
+      color:var(--muted);
+      padding:12px 16px;
+      background:rgba(100,116,139,0.1);
+      border-radius:8px;
+      border:1px solid rgba(100,116,139,0.2);
+    }
+    .hint::before{content:'ℹ️';font-size:16px}
+
+    .form-actions{
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      margin-top:8px;
+    }
+    
+    .btn{
+      background:linear-gradient(135deg,#b91c1c,#dc2626);
+      color:white;
+      padding:16px 32px;
+      border-radius:10px;
+      border:0;
+      font-weight:700;
+      font-size:16px;
+      cursor:pointer;
+      transition: all 0.3s ease;
+      box-shadow:0 4px 12px rgba(185,28,28,0.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .btn::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:-100%;
+      width:100%;
+      height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+      transition:left 0.5s;
+    }
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 6px 16px rgba(185,28,28,0.3);
+    }
+    .btn:hover::before{left:100%}
+    .btn:active{transform:translateY(0)}
+
+    .uploader-note{
+      padding:16px;
+      background:rgba(59,130,246,0.05);
+      border-radius:8px;
+      border:1px solid rgba(59,130,246,0.15);
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+    .uploader-note::before{
+      content:'💡 ';
+      font-size:16px;
+    }
+
+    footer{
+      margin-top:32px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      padding:20px;
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+    }
+    footer strong{color:#0f172a}
+
+    @keyframes fadeInDown{
+      from{opacity:0;transform:translateY(-20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+    @keyframes fadeInUp{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* Tablet */
+    @media (max-width:1024px){
+      :root{--maxwidth:100%}
+      body{padding:20px}
+      .card{padding:32px}
+      .navbar{padding:18px 20px}
+      .navbar-brand{height:55px;width:200px}
+    }
+
+    /* Mobile Landscape / Small Tablet */
+    @media (max-width:768px){
+      body{padding:16px}
+      .card{padding:24px}
+      .navbar{
+        flex-direction:column;
+        gap:16px;
+        padding:16px;
+        align-items:flex-start;
+      }
+      .nav-right{
+        width:100%;
+        justify-content:flex-end;
+      }
+      .navbar-brand{
+        height:50px;
+        width:180px;
+        align-self:flex-start;
+      }
+      .upload h2{font-size:24px}
+      .upload > p{font-size:14px}
+      .file-input-container{padding:36px 20px}
+      .upload-icon{width:56px;height:56px}
+      .upload-icon::before{font-size:28px}
+      .upload-text{font-size:16px}
+      .btn{width:100%;padding:14px 24px}
+      .form-actions{gap:12px}
+    }
+
+    /* Mobile Portrait */
+    @media (max-width:480px){
+      body{padding:12px}
+      .wrap{padding:0}
+      .card{
+        padding:20px;
+        border-radius:10px;
+      }
+      .navbar{
+        padding:12px;
+        border-radius:10px;
+        flex-direction:column;
+        gap:12px;
+      }
+      .navbar-brand{
+        height:45px;
+        width:160px;
+      }
+      .user-info{
+        padding:6px 12px;
+        border-radius:8px;
+      }
+      .avatar{
+        width:36px;
+        height:36px;
+        font-size:14px;
+      }
+      .user-name{font-size:13px}
+      .upload h2{
+        font-size:20px;
+        margin-bottom:6px;
+      }
+      .upload > p{
+        font-size:13px;
+        margin-bottom:24px;
+      }
+      label{font-size:13px}
+      .file-input-container{
+        padding:28px 16px;
+        border-radius:10px;
+      }
+      .upload-icon{
+        width:48px;
+        height:48px;
+        margin-bottom:12px;
+      }
+      .upload-icon::before{font-size:24px}
+      .upload-text{
+        font-size:15px;
+        margin-bottom:6px;
+      }
+      .upload-subtext{font-size:13px}
+      .hint{
+        padding:10px 12px;
+        font-size:12px;
+        border-radius:6px;
+      }
+      .hint::before{font-size:14px}
+      .btn{
+        padding:12px 20px;
+        font-size:15px;
+        border-radius:8px;
+      }
+      .uploader-note{
+        padding:12px;
+        font-size:12px;
+        border-radius:6px;
+      }
+      .uploader-note::before{font-size:14px}
+      footer{
+        padding:16px;
+        font-size:12px;
+        border-radius:10px;
+        margin-top:24px;
+      }
+      form#claim-form{gap:20px}
+      .form-actions{gap:10px}
+    }
+
+    /* Extra Small Mobile */
+    @media (max-width:360px){
+      body{padding:8px}
+      .card{padding:16px}
+      .navbar{padding:10px}
+      .navbar-brand{
+        height:40px;
+        width:140px;
+      }
+      .upload h2{font-size:18px}
+      .upload > p{font-size:12px}
+      .file-input-container{padding:24px 12px}
+      .upload-icon{width:40px;height:40px}
+      .upload-icon::before{font-size:20px}
+      .upload-text{font-size:14px}
+      .upload-subtext{font-size:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site-header">
+      <nav class="navbar">
+        <a class="navbar-brand" href="#" aria-label="FinSecure home"></a>
+        <div class="nav-right">
+          <a class="nav-link" href="./index.html">Home</a>
+          <div class="user-info">
+            <div class="avatar">VT</div>
+            <div class="user-name">User Name</div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section id="upload-section" class="card upload">
+        <h2>Upload all claim files</h2>
+        <p>Select all related files (insurance copy, FIR, damage photos) in one go. Backend will separate them.</p>
+
+        <form id="claim-form" method="post" enctype="multipart/form-data" action="#">
+          <div class="form-row">
+            <label for="all_files">Choose files</label>
+            <div class="file-input-container" id="dropzone">
+              <div class="upload-icon"></div>
+              <div class="upload-text">Drag & drop files here</div>
+              <div class="upload-subtext">or click to browse</div>
+              <input id="all_files" name="all_files[]" type="file" accept="image/*,application/pdf" multiple />
+            </div>
+            <div class="hint">Allowed: jpg, png, pdf • You can select multiple files at once</div>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn" type="submit">Upload Files</button>
+            <div class="uploader-note">
+              We'll connect this form to Google Drive / Sheets later (Apps Script). For demo, uploads are mocked.
+            </div>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <strong>Team DAMM</strong> • Demo UI — Backend integration pending. This page only accepts files in one input.
+    </footer>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('all_files');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, () => {
+        dropzone.classList.add('drag-over');
+      }, false);
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, () => {
+        dropzone.classList.remove('drag-over');
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      fileInput.files = files;
+    }, false);
+
+    document.getElementById('claim-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      alert('Demo: Files would be uploaded here!');
+    });
+  </script>
+</body>
+</html>

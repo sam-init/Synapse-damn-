@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinSecure — Login</title>
+  <style>
+    :root{
+      --brand-red:#b91c1c;
+      --accent:#3b82f6;
+      --bg:#f8fafc;
+      --card:#ffffff;
+      --muted:#64748b;
+      --border:#e2e8f0;
+      --radius:14px;
+      --shadow:0 4px 20px rgba(0,0,0,0.08);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      color:#1e293b;
+      line-height:1.6;
+      -webkit-font-smoothing:antialiased;
+      padding:24px;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .wrap{
+      width:100%;
+      max-width:1000px;
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    .card{
+      background:var(--card);
+      padding:40px;
+      border-radius:16px;
+      border:1px solid var(--border);
+      box-shadow:var(--shadow);
+      display:flex;
+      gap:48px;
+      align-items:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      height:4px;
+      background:linear-gradient(90deg,#b91c1c,#3b82f6);
+    }
+
+    .left{
+      flex:1;
+      padding-right:24px;
+      border-right:1px solid var(--border);
+    }
+
+    .logo{
+      height:70px;
+      width:220px;
+      background:url('logo.png') no-repeat left center;
+      background-size:contain;
+      margin-bottom:16px;
+    }
+
+    h2{
+      margin:0 0 8px 0;
+      font-size:26px;
+      color:#0f172a;
+      font-weight:700;
+    }
+
+    p.muted{
+      color:var(--muted);
+      margin-bottom:20px;
+      font-size:15px;
+    }
+
+    .demo-creds{
+      background:#f8fafc;
+      padding:16px;
+      border-radius:10px;
+      border:1px solid var(--border);
+      margin-bottom:10px;
+    }
+    .demo-creds:last-child{margin-bottom:0}
+
+    .demo-creds .label{
+      font-size:12px;
+      color:var(--muted);
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      margin-bottom:4px;
+      font-weight:600;
+    }
+
+    .demo-creds .value{
+      font-family:monospace;
+      font-size:14px;
+      color:#0f172a;
+      font-weight:600;
+    }
+
+    .form{
+      width:400px;
+      flex-shrink:0;
+    }
+
+    label{
+      display:block;
+      font-weight:600;
+      margin-bottom:6px;
+      color:#334155;
+      font-size:14px;
+    }
+
+    .input-group{
+      margin-bottom:18px;
+    }
+
+    input[type=text],
+    input[type=password],
+    select{
+      width:100%;
+      padding:12px 14px;
+      border-radius:8px;
+      border:1px solid var(--border);
+      font-size:14px;
+      background:white;
+      color:#1e293b;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input[type=text]:focus,
+    input[type=password]:focus,
+    select:focus{
+      outline:none;
+      border-color:var(--accent);
+      box-shadow:0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    input[type=text]:hover,
+    input[type=password]:hover,
+    select:hover{
+      border-color:#cbd5e1;
+    }
+
+    .btn{
+      background:linear-gradient(135deg,#b91c1c,#dc2626);
+      color:white;
+      padding:14px 24px;
+      border-radius:10px;
+      border:0;
+      font-weight:700;
+      font-size:15px;
+      cursor:pointer;
+      width:100%;
+      transition: all 0.3s ease;
+      box-shadow:0 4px 12px rgba(185,28,28,0.25);
+      margin-top:8px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .btn::before{
+      content:'';
+      position:absolute;
+      top:0;
+      left:-100%;
+      width:100%;
+      height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+      transition:left 0.5s;
+    }
+
+    .btn:hover{
+      transform:translateY(-2px);
+      box-shadow:0 6px 16px rgba(185,28,28,0.35);
+    }
+
+    .btn:hover::before{left:100%}
+
+    .btn:active{transform:translateY(0)}
+
+    .note{
+      font-size:12px;
+      color:var(--muted);
+      margin-top:12px;
+      padding:10px;
+      background:rgba(59,130,246,0.05);
+      border-radius:6px;
+      border:1px solid rgba(59,130,246,0.1);
+      text-align:center;
+    }
+
+    .note::before{
+      content:'ℹ️ ';
+      font-size:14px;
+    }
+
+    footer{
+      margin-top:24px;
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      padding:20px;
+      background:var(--card);
+      border-radius:var(--radius);
+      border:1px solid var(--border);
+    }
+    footer strong{color:#0f172a}
+
+    .muted{color:var(--muted)}
+
+    @keyframes fadeInUp{
+      from{opacity:0;transform:translateY(20px)}
+      to{opacity:1;transform:translateY(0)}
+    }
+
+    /* Toast notification */
+    .toast{
+      position:fixed;
+      bottom:24px;
+      right:24px;
+      background:linear-gradient(135deg,#3b82f6,#2563eb);
+      color:white;
+      padding:14px 20px;
+      border-radius:10px;
+      font-weight:700;
+      box-shadow:0 8px 24px rgba(59,130,246,0.4);
+      opacity:0;
+      transition:opacity 0.3s ease;
+      z-index:1000;
+      font-size:14px;
+    }
+    .toast.show{opacity:1}
+
+    /* Responsive */
+    @media(max-width:900px){
+      .card{
+        flex-direction:column;
+        gap:32px;
+        padding:32px;
+      }
+      .left{
+        border-right:none;
+        border-bottom:1px solid var(--border);
+        padding-right:0;
+        padding-bottom:24px;
+        width:100%;
+      }
+      .form{width:100%}
+    }
+
+    @media(max-width:640px){
+      body{padding:16px}
+      .card{padding:24px}
+      h2{font-size:22px}
+      .logo{height:60px;width:200px}
+      footer{padding:16px;font-size:12px}
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="left">
+        <div class="logo"></div>
+        <h2>Sign in to FinSecure</h2>
+        <p class="muted">Use demo credentials below. Role determines your dashboard access.</p>
+        
+        <div class="demo-creds">
+          <div class="label">Demo Admin</div>
+          <div class="value">admin@demo.com / admin123</div>
+        </div>
+
+        <div class="demo-creds">
+          <div class="label">Demo User</div>
+          <div class="value">user@demo.com / user123</div>
+        </div>
+      </div>
+
+      <form class="form" id="login-form" onsubmit="return false">
+        <div class="input-group">
+          <label for="email">Email Address</label>
+          <input id="email" type="text" placeholder="you@example.com" />
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Enter your password" />
+        </div>
+
+        <div class="input-group">
+          <label for="role">Login As</label>
+          <select id="role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <button id="login-btn" class="btn">Sign In</button>
+        
+        <div class="note">This is a demo-only login. No credentials are transmitted.</div>
+      </form>
+    </div>
+
+    <footer>
+      <strong>Team DAMM</strong> • Demo Login (Client-side Only)
+    </footer>
+  </div>
+
+  <script>
+    // Preselect role if ?role=... is present
+    function getParam(name){
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+    
+    const preRole = getParam('role');
+    if(preRole){
+      const roleSelect = document.getElementById('role');
+      if(roleSelect) roleSelect.value = preRole;
+    }
+
+    const loginBtn = document.getElementById('login-btn');
+    
+    function showToast(message, success = true){
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      
+      if(!success){
+        toast.style.background = 'linear-gradient(135deg,#dc2626,#b91c1c)';
+      }
+      
+      document.body.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    loginBtn.addEventListener('click', () => {
+      const email = document.getElementById('email').value.trim();
+      const pass = document.getElementById('password').value.trim();
+      const role = document.getElementById('role').value;
+
+      // Demo credentials check
+      const okAdmin = (email === 'admin@demo.com' && pass === 'admin123' && role === 'admin');
+      const okUser = (email === 'user@demo.com' && pass === 'user123' && role === 'user');
+
+      if(okAdmin){
+        showToast('✓ Signed in as Admin — redirecting...');
+        setTimeout(() => {
+          window.location.href = 'admin.html';
+        }, 1200);
+        return;
+      }
+      
+      if(okUser){
+        showToast('✓ Signed in as User — redirecting...');
+        setTimeout(() => {
+          window.location.href = 'upload.html';
+        }, 1200);
+        return;
+      }
+
+      showToast('✗ Invalid credentials — please use demo credentials', false);
+    });
+
+    // Allow Enter key to submit
+    document.getElementById('login-form').addEventListener('keypress', (e) => {
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        loginBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
